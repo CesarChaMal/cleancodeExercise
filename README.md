@@ -54,9 +54,11 @@ Some versions include a Main class to run examples directly (notably in `refacto
 
 You're right—the “How to run” section wasn’t displaying correctly due to broken code fences and a missing command. Here’s a clean, fixed version of the Build and How to run sections.
 
+You're right—those code fences were still off. Here’s a clean replacement for the Build and How to run sections with correctly formatted fences and spacing.
+
+```markdown
 ## Build
-```
-bash
+```bash
 mvn -q -DskipTests package
 ```
 This produces compiled classes in `target/classes`.
@@ -66,18 +68,15 @@ This produces compiled classes in `target/classes`.
 You can run any version that has a `Main` class using the Java command below. If you use an IDE, you can run the corresponding Main class directly from the editor.
 
 - Refactor (better):
-```
-bash
+```bash
 java -cp target/classes com.cleancode.exercise.refactor_better.Main
 ```
 - Refactor (decorator):
-```
-bash
+```bash
 java -cp target/classes com.cleancode.exercise.refactor_better_with_decorator.Main
 ```
 - Refactor (functional):
-```
-bash
+```bash
 java -cp target/classes com.cleancode.exercise.refactor_better_functional.Main
 ```
 If you prefer Maven Exec Plugin, you can add it to the build and run with `-Dexec.mainClass=...`. As-is, the plugin is not configured in this project.
