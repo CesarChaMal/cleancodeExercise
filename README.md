@@ -52,6 +52,8 @@ Some versions include a Main class to run examples directly (notably in `refacto
 - Java 14+ (project config targets 14)
 - Maven 3.8+
 
+You're right—the “How to run” section wasn’t displaying correctly due to broken code fences and a missing command. Here’s a clean, fixed version of the Build and How to run sections.
+
 ## Build
 ```
 bash
@@ -73,7 +75,7 @@ java -cp target/classes com.cleancode.exercise.refactor_better.Main
 bash
 java -cp target/classes com.cleancode.exercise.refactor_better_with_decorator.Main
 ```
-- Refactor (functional) — note the package name includes “reafactor”:
+- Refactor (functional):
 ```
 bash
 java -cp target/classes com.cleancode.exercise.refactor_better_functional.Main
