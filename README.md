@@ -8,7 +8,7 @@ Versions order (from earliest to latest):
 2) refactor_good
 3) refactor_better
 4) refactor_better_with_decorator
-5) refactor_better_functional (package name in code is `reafactor_better_functional`)
+5) refactor_better_functional
 
 ## What each version teaches
 
@@ -31,7 +31,7 @@ Versions order (from earliest to latest):
     - Uses the Decorator pattern (e.g., EmailConfirmationOrder) to compose cross-cutting behavior (sending emails) around any Order without modifying core logic.
     - Encourages composition over inheritance and avoids conditionals for optional features.
 
-- refactor_better_functional (reafactor_better_functional)
+- refactor_better_functional
     - Makes Order a functional interface to support lambdas and dynamic behavior creation.
     - Keeps decorator composition so the same cross-cutting features can wrap either classes or lambdas.
     - Maximizes flexibility and testability with minimal boilerplate.
@@ -43,9 +43,9 @@ Versions order (from earliest to latest):
     - refactor_good
     - refactor_better
     - refactor_better_with_decorator
-    - reafactor_better_functional  ← package name includes a minor typo (“reafactor”)
+    - refactor_better_functional
 
-Some versions include a Main class to run examples directly (notably in `refactor_better`, `refactor_better_with_decorator`, and `reafactor_better_functional`).
+Some versions include a Main class to run examples directly (notably in `refactor_better`, `refactor_better_with_decorator`, and `refactor_better_functional`).
 
 ## Requirements
 
@@ -76,7 +76,7 @@ java -cp target/classes com.cleancode.exercise.refactor_better_with_decorator.Ma
 - Refactor (functional) — note the package name includes “reafactor”:
 ```
 bash
-java -cp target/classes com.cleancode.exercise.reafactor_better_functional.Main
+java -cp target/classes com.cleancode.exercise.refactor_better_functional.Main
 ```
 If you prefer Maven Exec Plugin, you can add it to the build and run with `-Dexec.mainClass=...`. As-is, the plugin is not configured in this project.
 

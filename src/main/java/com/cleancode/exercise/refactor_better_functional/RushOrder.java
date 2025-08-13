@@ -1,4 +1,4 @@
-package com.cleancode.exercise.reafactor_better_functional;
+package com.cleancode.exercise.refactor_better_functional;
 
 public class RushOrder implements Order {
     @Override
