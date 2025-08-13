@@ -51,10 +51,6 @@ Some versions include a Main class to run examples directly (notably in `refacto
 - Java 14+ (project config targets 14)
 - Maven 3.8+
 
-You're right—the “How to run” section wasn’t displaying correctly due to broken code fences and a missing command. Here’s a clean, fixed version of the Build and How to run sections.
-
-You're right—those code fences were still off. Here’s a clean replacement for the Build and How to run sections with correctly formatted fences and spacing.
-
 ## Build
 
 ```bash
