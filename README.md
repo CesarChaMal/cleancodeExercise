@@ -1,4 +1,3 @@
-```markdown
 # Clean Code Exercise — Progressive Refactors
 
 This project demonstrates a progression of refactorings of a small “order processing” example. Each package shows a more maintainable and extensible approach than the previous one.
@@ -57,6 +56,7 @@ You're right—the “How to run” section wasn’t displaying correctly due to
 You're right—those code fences were still off. Here’s a clean replacement for the Build and How to run sections with correctly formatted fences and spacing.
 
 ## Build
+
 ```bash
 mvn -q -DskipTests package
 ```
@@ -140,4 +140,3 @@ If you prefer Maven Exec Plugin, you can add it to the build and run with `-Dexe
 
 - The final version’s package is named `reafactor_better_functional` (intent is “refactor”). Keep this in mind for run commands and imports.
 - Some earlier versions do not include a `Main` class; they are intended to illustrate refactoring direction rather than be executed directly.
-```
