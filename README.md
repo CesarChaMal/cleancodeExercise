@@ -56,7 +56,6 @@ You're right—the “How to run” section wasn’t displaying correctly due to
 
 You're right—those code fences were still off. Here’s a clean replacement for the Build and How to run sections with correctly formatted fences and spacing.
 
-```markdown
 ## Build
 ```bash
 mvn -q -DskipTests package
