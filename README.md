@@ -134,5 +134,4 @@ If you prefer Maven Exec Plugin, you can add it to the build and run with `-Dexe
 
 ## Notes
 
-- The final version’s package is named `reafactor_better_functional` (intent is “refactor”). Keep this in mind for run commands and imports.
 - Some earlier versions do not include a `Main` class; they are intended to illustrate refactoring direction rather than be executed directly.
