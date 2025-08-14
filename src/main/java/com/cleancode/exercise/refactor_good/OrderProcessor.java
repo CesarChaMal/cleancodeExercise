@@ -2,10 +2,10 @@ package com.cleancode.exercise.refactor_good;
 
 public class OrderProcessor {
     enum OrderType {
-        REGULAR, RUSH, UNKNOW
+        REGULAR, RUSH, UNKNOWN
     }
 
-    public void process(String customerName, OrderType orderType, boolean sendConfirmation) {
+    public void processOrder(String customerName, OrderType orderType, boolean sendConfirmation) {
         handleOrder(customerName, orderType);
 
         if (sendConfirmation) {
