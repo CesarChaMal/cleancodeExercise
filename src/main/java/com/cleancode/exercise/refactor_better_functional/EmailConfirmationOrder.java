@@ -1,17 +1,17 @@
 package com.cleancode.exercise.refactor_better_functional;
 
 public class EmailConfirmationOrder implements Order {
-    private final Order wrapped;
+    private final Order order;
     private final EmailService emailService;
 
-    public EmailConfirmationOrder(Order wrapped, EmailService emailService) {
-        this.wrapped = wrapped;
+    public EmailConfirmationOrder(Order order, EmailService emailService) {
+        this.order = order;
         this.emailService = emailService;
     }
 
     @Override
     public void process(String customerName) {
-        wrapped.process(customerName);                         // delegate original behavior
+        order.process(customerName);                         // delegate original behavior
         emailService.sendConfirmation(customerName);           // add new behavior
     }
 }
