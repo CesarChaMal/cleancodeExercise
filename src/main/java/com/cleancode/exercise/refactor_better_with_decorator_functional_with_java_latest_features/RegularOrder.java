@@ -1,0 +1,11 @@
+package com.cleancode.exercise.refactor_better_with_decorator_functional_with_java_latest_features;
+
+public class RegularOrder implements Order {
+    public RegularOrder(String s) {
+    }
+
+    @Override
+    public void process(String customerName) {
+        System.out.println("Processing regular order for " + customerName);
+    }
+}

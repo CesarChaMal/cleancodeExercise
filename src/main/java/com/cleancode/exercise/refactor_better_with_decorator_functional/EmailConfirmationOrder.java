@@ -1,4 +1,4 @@
-package com.cleancode.exercise.refactor_better_functional;
+package com.cleancode.exercise.refactor_better_with_decorator_functional;
 
 public class EmailConfirmationOrder implements Order {
     private final Order order;

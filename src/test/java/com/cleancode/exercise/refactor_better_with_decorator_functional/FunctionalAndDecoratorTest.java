@@ -1,4 +1,4 @@
-package com.cleancode.exercise.refactor_better_functional;
+package com.cleancode.exercise.refactor_better_with_decorator_functional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
