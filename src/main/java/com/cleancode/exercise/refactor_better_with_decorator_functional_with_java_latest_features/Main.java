@@ -17,17 +17,24 @@ public class Main {
         var emailDecoratorsSync  = DecoratorStrategies.withEmail(System.out, syncSender);
         var emailDecoratorsAsync = DecoratorStrategies.withEmail(System.out, asyncSender);
 
-        // === Compose pipeline: LOG -> TIME -> EMAIL_SYNC on regular ===
-        var regularPipeline = apply(regular, basicDecorators.get(DecoratorType.LOGGING));
-        regularPipeline = apply(regularPipeline, basicDecorators.get(DecoratorType.TIMING));
-        regularPipeline = apply(regularPipeline, emailDecoratorsSync.get(DecoratorType.EMAIL_SYNC));
-        regularPipeline.process("Alice");
+        // LOG -> NONE -> EMAIL_SYNC (skips middle stage)
+        var pipeline1 = apply(regular, basicDecorators.get(DecoratorType.LOGGING));
+        pipeline1 = apply(pipeline1, basicDecorators.get(DecoratorType.NONE));
+        pipeline1 = apply(pipeline1, emailDecoratorsSync.get(DecoratorType.EMAIL_SYNC));
+        pipeline1.process("Alice");
 
-        // === Compose pipeline: LOG -> RETRY -> EMAIL_ASYNC on rush ===
-        var rushPipeline = apply(rush, basicDecorators.get(DecoratorType.LOGGING));
-        rushPipeline = apply(rushPipeline, basicDecorators.get(DecoratorType.RETRY_3));
-        rushPipeline = apply(rushPipeline, emailDecoratorsAsync.get(DecoratorType.EMAIL_ASYNC));
-        rushPipeline.process("Bob");
+        // NONE -> TIMING -> EMAIL_ASYNC (skips logging)
+        var pipeline2 = apply(rush, basicDecorators.get(DecoratorType.NONE));
+        pipeline2 = apply(pipeline2, basicDecorators.get(DecoratorType.TIMING));
+        pipeline2 = apply(pipeline2, emailDecoratorsAsync.get(DecoratorType.EMAIL_ASYNC));
+        pipeline2.process("Bob");
+
+        // LOG -> TIMING -> NONE (no email)
+        var custom = Order.of(c -> System.out.println("Processing FLASH SALE order for " + c));
+        var pipeline3 = apply(custom, basicDecorators.get(DecoratorType.LOGGING));
+        pipeline3 = apply(pipeline3, basicDecorators.get(DecoratorType.TIMING));
+        pipeline3 = apply(pipeline3, emailDecoratorsSync.get(DecoratorType.NONE));
+        pipeline3.process("Carlos");
 
         // === Ad-hoc functional order ===
         var flashSale = Order.of(c -> System.out.println("Processing FLASH SALE order for " + c));

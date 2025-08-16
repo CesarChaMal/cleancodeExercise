@@ -18,34 +18,20 @@ public class Main {
         var simpleSync  = DecoratorRegistries.simple(System.out, syncSender);
         var simpleAsync = DecoratorRegistries.simple(System.out, asyncSender);
 
-        // === Compose simple pipelines with generics ===
-        // LOG -> TIME -> EMAIL_SYNC on regular
-        var regularPipeline = threeStage(
-                regular, simpleSync,
-                DecoratorType.LOGGING,
-                DecoratorType.TIMING,
-                DecoratorType.EMAIL_SYNC
-        );
-        regularPipeline.process("Alice");
+        // === Compose simple pipelines with generics (matching your non-generic examples) ===
 
-        // LOG -> RETRY -> EMAIL_ASYNC on rush
-        var rushPipeline = threeStage(
-                rush, simpleAsync,
-                DecoratorType.LOGGING,
-                DecoratorType.RETRY_3,
-                DecoratorType.EMAIL_ASYNC
-        );
-        rushPipeline.process("Bob");
+        // 1) LOG -> NONE -> EMAIL_SYNC on regular (skips middle stage)
+        var pipeline1 = Pipelines.threeStage(regular, simpleSync, DecoratorType.LOGGING, DecoratorType.NONE, DecoratorType.EMAIL_SYNC);
+        pipeline1.process("Alice");
 
-        // === Ad-hoc functional order ===
+        // 2) NONE -> TIMING -> EMAIL_ASYNC on rush (skips logging)
+        var pipeline2 = Pipelines.threeStage(rush, simpleAsync, DecoratorType.NONE, DecoratorType.TIMING, DecoratorType.EMAIL_ASYNC);
+        pipeline2.process("Bob");
+
+        // 3) LOG -> TIMING -> NONE on flashSale (no email)
         var flashSale = Order.of(c -> System.out.println("Processing FLASH SALE order for " + c));
-        var flashWithLogAndEmail = threeStage(
-                flashSale, simpleSync,
-                DecoratorType.LOGGING,
-                DecoratorType.TIMING,       // can be TIMING or another stage
-                DecoratorType.EMAIL_SYNC
-        );
-        flashWithLogAndEmail.process("Carlos");
+        var pipeline3 = Pipelines.loggingTimingEmail(flashSale, simpleSync, DecoratorType.LOGGING, DecoratorType.TIMING, DecoratorType.NONE);
+        pipeline3.process("Carlos");
 
         // === RichOrder usage (operate on Customer) ===
         var richFromSimple = OrderAdapters.toRich(regular);
@@ -55,21 +41,11 @@ public class Main {
         var richAsync = DecoratorRegistries.rich(System.out, asyncSender);
 
         // LOG -> TIME -> EMAIL_SYNC on richFromSimple
-        var richPipeline = threeStage(
-                richFromSimple, richSync,
-                RichDecoratorType.LOGGING,
-                RichDecoratorType.TIMING,
-                RichDecoratorType.EMAIL_SYNC
-        );
+        var richPipeline = Pipelines.loggingTimingEmail(richFromSimple, richSync, RichDecoratorType.LOGGING, RichDecoratorType.TIMING, RichDecoratorType.EMAIL_SYNC);
         richPipeline.process(new Customer("Iris", "iris@example.com"));
 
         // LOG -> RETRY -> EMAIL_ASYNC on richFromSimple
-        var richAsyncPipeline = threeStage(
-                richFromSimple, richAsync,
-                RichDecoratorType.LOGGING,
-                RichDecoratorType.RETRY_3,
-                RichDecoratorType.EMAIL_ASYNC
-        );
+        var richAsyncPipeline = Pipelines.loggingRetryEmail(richFromSimple, richAsync, RichDecoratorType.LOGGING, RichDecoratorType.RETRY_3, RichDecoratorType.EMAIL_ASYNC);
         richAsyncPipeline.process(new Customer("Jack", "jack@example.com"));
 
         // Close async sender (virtual-thread executor)

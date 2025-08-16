@@ -129,12 +129,13 @@ class FunctionalAndDecoratorLatestFeaturesTest {
 
         var base = OrderFactory.from(OrderType.REGULAR);
 
-        var basic = DecoratorStrategies.basic(System.out);
-        var email = DecoratorStrategies.withEmail(System.out, syncSender);
+//        var basic = DecoratorStrategies.basic(System.out);
+//        var email = DecoratorStrategies.withEmail(System.out, syncSender);
+        var registries = buildSimpleRegistries(System.out, syncSender);
 
-        var pipeline = apply(base, basic.get(DecoratorType.LOGGING));
-        pipeline = apply(pipeline, basic.get(DecoratorType.TIMING));
-        pipeline = apply(pipeline, email.get(DecoratorType.EMAIL_SYNC));
+        var pipeline = apply(base, registries.basic().get(DecoratorType.LOGGING));
+        pipeline = apply(pipeline, registries.basic().get(DecoratorType.TIMING));
+        pipeline = apply(pipeline, registries.email().get(DecoratorType.EMAIL_SYNC));
 
         pipeline.process("Helen");
 
@@ -149,7 +150,7 @@ class FunctionalAndDecoratorLatestFeaturesTest {
     void decorator_registry_applies_logging_retry_and_async_email() throws Exception {
         var asyncSender = new AsyncEmailSender();
         try {
-            var base = getOrder();
+            var base = OrderFactory.from(OrderType.RUSH);
 
 //            var basic = DecoratorStrategies.basic(System.out);
 //            var email = DecoratorStrategies.withEmail(System.out, asyncSender);
@@ -174,11 +175,73 @@ class FunctionalAndDecoratorLatestFeaturesTest {
     }
 
     @Test
+    void decorator_registry_supports_NONE_to_skip_stages() {
+        var emailService = new EmailService();
+        EmailSender syncSender = emailService::sendConfirmation;
+
+        var base = OrderFactory.from(OrderType.REGULAR);
+
+//        var basic = DecoratorStrategies.basic(System.out);
+//        var email = DecoratorStrategies.withEmail(System.out, syncSender);
+        var registries = buildSimpleRegistries(System.out, syncSender);
+
+        // LOG -> NONE -> EMAIL_SYNC (middle skipped)
+        var p1 = apply(base, registries.basic().get(DecoratorType.LOGGING));
+        p1 = apply(p1, registries.basic().get(DecoratorType.NONE));
+        p1 = apply(p1, registries.email().get(DecoratorType.EMAIL_SYNC));
+        p1.process("Nora");
+
+        String out1 = out.toString().toLowerCase();
+        assertTrue(out1.contains("[log]"), "Should still log");
+        assertTrue(out1.contains("nora"), "Should include customer");
+        assertTrue(out1.contains("sending confirmation"), "Should still send email");
+
+        out.reset();
+
+        // LOG -> TIMING -> NONE (no email)
+        var p2 = apply(base, registries.basic().get(DecoratorType.LOGGING));
+        p2 = apply(p2, registries.basic().get(DecoratorType.TIMING));
+        p2 = apply(p2, registries.email().get(DecoratorType.NONE));
+        p2.process("Owen");
+
+        String out2 = out.toString().toLowerCase();
+        assertTrue(out2.contains("[log]"), "Should log");
+        assertTrue(out2.contains("processed"), "Should include timing");
+        assertTrue(!out2.contains("sending confirmation"), "No email when NONE is used");
+    }
+
+    @Test
+    void rich_decorator_registry_applies_logging_timing_and_sync_email() {
+        var emailService = new EmailService();
+        EmailSender syncSender = emailService::sendConfirmation;
+
+        var base = OrderFactory.from(OrderType.REGULAR);
+        RichOrder richBase = OrderAdapters.toRich(base);
+
+//        var basic = DecoratorStrategies.basic(System.out);
+//        var email = DecoratorStrategies.withEmail(System.out, syncSender);
+        var registries = buildRichRegistries(System.out, syncSender);
+
+
+        var pipeline = apply(richBase, registries.basic().get(RichDecoratorType.LOGGING));
+        pipeline = apply(pipeline, registries.basic().get(RichDecoratorType.TIMING));
+        pipeline = apply(pipeline, registries.email().get(RichDecoratorType.EMAIL_SYNC));
+
+        pipeline.process(new Customer("Helen", "helen@example.com"));
+
+        var outStr = out.toString().toLowerCase();
+        assertTrue(outStr.contains("[rich]"), "Should log before/after");
+        assertTrue(outStr.contains("processed"), "Should include timing output");
+        assertTrue(outStr.contains("helen"), "Should include customer name");
+        assertTrue(outStr.contains("sending confirmation"), "Should send confirmation via sync decorator");
+    }
+
+    @Test
     void rich_decorator_registry_applies_logging_retry_and_async_email() throws Exception {
         var asyncSender = new AsyncEmailSender();
         try {
             // Start from a simple Order, then adapt to RichOrder for customer-aware pipeline
-            var base = getOrder();
+            var base = OrderFactory.from(OrderType.RUSH);
             RichOrder richBase = OrderAdapters.toRich(base);
 
 //            var basic = RichDecoratorStrategies.basic(System.out);
@@ -204,6 +267,44 @@ class FunctionalAndDecoratorLatestFeaturesTest {
         }
     }
 
+    @Test
+    void rich_decorator_registry_supports_NONE_to_skip_stages() {
+        var emailService = new EmailService();
+        EmailSender syncSender = emailService::sendConfirmation;
+
+        // Start from a simple Order, then adapt to RichOrder for customer-aware pipeline
+        var base = OrderFactory.from(OrderType.REGULAR);
+        RichOrder richBase = OrderAdapters.toRich(base);
+
+//        var basic = DecoratorStrategies.basic(System.out);
+//        var email = DecoratorStrategies.withEmail(System.out, syncSender);
+        var registries = buildRichRegistries(System.out, syncSender);
+
+        // LOG -> NONE -> EMAIL_SYNC (middle skipped)
+        var p1 = apply(richBase, registries.basic().get(RichDecoratorType.LOGGING));
+        p1 = apply(p1, registries.basic().get(RichDecoratorType.NONE));
+        p1 = apply(p1, registries.email().get(RichDecoratorType.EMAIL_SYNC));
+        p1.process(new Customer("Nora", "nora@example.com"));
+
+        String out1 = out.toString().toLowerCase();
+        assertTrue(out1.contains("[rich]"), "Should still log");
+        assertTrue(out1.contains("nora"), "Should include customer");
+        assertTrue(out1.contains("sending confirmation"), "Should still send email");
+
+        out.reset();
+
+        // LOG -> TIMING -> NONE (no email)
+        var p2 = apply(richBase, registries.basic().get(RichDecoratorType.LOGGING));
+        p2 = apply(p2, registries.basic().get(RichDecoratorType.TIMING));
+        p2 = apply(p2, registries.email().get(RichDecoratorType.NONE));
+        p2.process(new Customer("Owen", "owen@example.com"));
+
+        String out2 = out.toString().toLowerCase();
+        assertTrue(out2.contains("[rich]"), "Should log");
+        assertTrue(out2.contains("processed"), "Should include timing");
+        assertTrue(!out2.contains("sending confirmation"), "No email when NONE is used");
+    }
+
     private record SimpleRegistries(
             Map<DecoratorType, UnaryOperator<Order>> basic,
             Map<DecoratorType, UnaryOperator<Order>> email
@@ -224,11 +325,6 @@ class FunctionalAndDecoratorLatestFeaturesTest {
         var basic = RichDecoratorStrategies.basic(out);
         var email = RichDecoratorStrategies.withEmail(out, sender);
         return new RichRegistries(basic, email);
-    }
-
-    private Order getOrder() {
-        var base = OrderFactory.from(OrderType.RUSH);
-        return base;
     }
 
     private static <T> T apply(T base, UnaryOperator<T> decorator) {
