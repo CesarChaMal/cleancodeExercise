@@ -1,4 +1,4 @@
-package com.cleancode.exercise.refactor_better_with_decorator_functional_with_java_latest_features;
+package com.cleancode.exercise.refactor_better_with_decorator_functional_with_java_latest_features_and_generics;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,9 +9,12 @@ import java.io.PrintStream;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
+import static com.cleancode.exercise.refactor_better_with_decorator_functional_with_java_latest_features_and_generics.DecoratorRegistries.rich;
+import static com.cleancode.exercise.refactor_better_with_decorator_functional_with_java_latest_features_and_generics.DecoratorRegistries.simple;
+import static com.cleancode.exercise.refactor_better_with_decorator_functional_with_java_latest_features_and_generics.Pipelines.threeStage;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class FunctionalAndDecoratorLatestFeaturesTest {
+class FunctionalAndDecoratorLatestFeaturesAndGenericsTest {
     private final PrintStream originalOut = System.out;
     private ByteArrayOutputStream out;
 
@@ -151,13 +154,26 @@ class FunctionalAndDecoratorLatestFeaturesTest {
         try {
             var base = getOrder();
 
-//            var basic = DecoratorStrategies.basic(System.out);
-//            var email = DecoratorStrategies.withEmail(System.out, asyncSender);
-            var registries = buildSimpleRegistries(System.out, asyncSender);
+//            var registries = buildOrderRegistries(System.out, asyncSender);
+            var registries = simple(System.out, asyncSender);
 
-            var pipeline = apply(base, registries.basic().get(DecoratorType.LOGGING));
-            pipeline = apply(pipeline, registries.basic().get(DecoratorType.RETRY_3));
-            pipeline = apply(pipeline, registries.email().get(DecoratorType.EMAIL_ASYNC));
+            // use generic pipeline helper with simple (Order) keys
+/*
+            var pipeline = getPipeline(
+                    base,
+                    registries,
+                    DecoratorType.LOGGING,
+                    DecoratorType.RETRY_3,
+                    DecoratorType.EMAIL_ASYNC
+            );
+*/
+            var pipeline = threeStage(
+                    base,
+                    registries,
+                    DecoratorType.LOGGING,
+                    DecoratorType.RETRY_3,
+                    DecoratorType.EMAIL_ASYNC
+            );
 
             pipeline.process("Ian");
 
@@ -181,13 +197,26 @@ class FunctionalAndDecoratorLatestFeaturesTest {
             var base = getOrder();
             RichOrder richBase = OrderAdapters.toRich(base);
 
-//            var basic = RichDecoratorStrategies.basic(System.out);
-//            var email = RichDecoratorStrategies.withEmail(System.out, asyncSender);
-            var registries = buildRichRegistries(System.out, asyncSender);
+//            var registries = buildRichRegistries(System.out, asyncSender);
+            var registries = rich(System.out, asyncSender);
 
-            var pipeline = apply(richBase, registries.basic().get(RichDecoratorType.LOGGING));
-            pipeline = apply(pipeline, registries.basic().get(RichDecoratorType.RETRY_3));
-            pipeline = apply(pipeline, registries.email().get(RichDecoratorType.EMAIL_ASYNC));
+            // use the same generic helper with rich keys
+/*
+            var pipeline = getPipeline(
+                    richBase,
+                    registries,
+                    RichDecoratorType.LOGGING,
+                    RichDecoratorType.RETRY_3,
+                    RichDecoratorType.EMAIL_ASYNC
+            );
+*/
+            var pipeline = threeStage(
+                    richBase,
+                    registries,
+                    RichDecoratorType.LOGGING,
+                    RichDecoratorType.RETRY_3,
+                    RichDecoratorType.EMAIL_ASYNC
+            );
 
             // Rich pipeline expects a Customer
             pipeline.process(new Customer("Ian", "ian@example.com"));
@@ -204,27 +233,33 @@ class FunctionalAndDecoratorLatestFeaturesTest {
         }
     }
 
-    private record SimpleRegistries(
-            Map<DecoratorType, UnaryOperator<Order>> basic,
-            Map<DecoratorType, UnaryOperator<Order>> email
+/*
+    // Generic registries holder to avoid duplication across simple/rich variants
+    private record Registries<K, T>(
+            Map<K, UnaryOperator<T>> basic,
+            Map<K, UnaryOperator<T>> email
     ) {}
 
-    private record RichRegistries(
-            Map<RichDecoratorType, UnaryOperator<RichOrder>> basic,
-            Map<RichDecoratorType, UnaryOperator<RichOrder>> email
-    ) {}
+    // Generic pipeline builder that works for both simple and rich flows
+    private static <K, T> T getPipeline(T base, Registries<K, T> registries, K loggingKey, K retryKey, K emailAsyncKey) {
+        var pipeline = apply(base, registries.basic().get(loggingKey));
+        pipeline = apply(pipeline, registries.basic().get(retryKey));
+        pipeline = apply(pipeline, registries.email().get(emailAsyncKey));
+        return pipeline;
+    }
 
-    private static SimpleRegistries buildSimpleRegistries(PrintStream out, EmailSender sender) {
+    private static Registries<DecoratorType, Order> buildOrderRegistries(PrintStream out, EmailSender sender) {
         var basic = DecoratorStrategies.basic(out);
         var email = DecoratorStrategies.withEmail(out, sender);
-        return new SimpleRegistries(basic, email);
+        return new Registries<>(basic, email);
     }
 
-    private static RichRegistries buildRichRegistries(PrintStream out, EmailSender sender) {
+    private static Registries<RichDecoratorType, RichOrder> buildRichRegistries(PrintStream out, EmailSender sender) {
         var basic = RichDecoratorStrategies.basic(out);
         var email = RichDecoratorStrategies.withEmail(out, sender);
-        return new RichRegistries(basic, email);
+        return new Registries<>(basic, email);
     }
+*/
 
     private Order getOrder() {
         var base = OrderFactory.from(OrderType.RUSH);

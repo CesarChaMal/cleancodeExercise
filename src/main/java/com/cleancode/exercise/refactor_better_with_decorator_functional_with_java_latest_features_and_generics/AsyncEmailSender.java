@@ -1,6 +1,7 @@
-package com.cleancode.exercise.refactor_better_with_decorator_functional_with_java_latest_features;
+package com.cleancode.exercise.refactor_better_with_decorator_functional_with_java_latest_features_and_generics;
 
 import java.util.concurrent.ExecutorService;
+
 import static java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor;
 
 public final class AsyncEmailSender implements EmailSender, AutoCloseable {

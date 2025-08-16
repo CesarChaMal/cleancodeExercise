@@ -9,6 +9,7 @@ Versions order (from earliest to latest):
 4) refactor_better_with_decorator
 5) refactor_better_with_decorator_functional
 6) refactor_better_with_decorator_functional_with_java_latest_features
+7) refactor_better_with_decorator_functional_with_java_latest_features_and_generics
 
 ## What each version teaches
 
@@ -80,11 +81,29 @@ Here’s a clear, side‑by‑side comparison of all six iterations, highlightin
     - Modern concurrency: virtual threads for cheap async email.
     - Domain alignment: you can process simple names or rich Customers and bridge between them seamlessly.
 
-### Why v6 is the best (in theory and practice)
-- It combines the clarity and extensibility of Strategy/Decorator (v3/v4) with the ergonomics and power of functions (v5).
-- It supports both simple and rich domain pipelines without rewriting existing code (adapters).
-- It’s future‑proof: adding observability, resilience, and async composition is a matter of composing functions, not creating and wiring more classes.
-- It remains approachable: simple APIs (Order, Orders, withEmail, factory methods) + optional registries keep usage consistent and readable.
+7) Decorator Functional with latest Java features AND generics (v7)
+- Style: v6 plus generic composition utilities that remove duplication between simple (Order) and rich (RichOrder) flows.
+- What’s new and why it matters:
+    - DecoratorRegistries<K, T>: a generic record holding two typed maps (basic and email) where K is an enum (DecoratorType or RichDecoratorType) and T is the pipeline type (Order or RichOrder).
+        - Factory methods: simple(...) and rich(...) build typed registries from the existing strategy providers.
+    - Pipelines: a small generic utility to assemble pipelines declaratively:
+        - threeStage(base, registries, LOGGING, RETRY_3, EMAIL_ASYNC)
+        - build(base, stageMap, LOGGING, TIMING, …)
+    - Benefits:
+        - DRY: eliminates duplicated “basic + email + apply in order” code across tests and the Main class.
+        - Type‑safe: compile‑time safety for both simple and rich flows.
+        - Readable: intent first; wiring is standardized and reusable.
+- Pros:
+    - Everything from v6, plus simpler, reusable wiring via generics.
+    - Ideal for larger teams where consistency of pipeline assembly matters.
+- Cons:
+    - Slightly more conceptual surface (a generic holder + pipeline helper), but public APIs remain approachable.
+
+### Why v6/v7 are the best (in theory and practice)
+- They combine the clarity and extensibility of Strategy/Decorator (v3/v4) with the ergonomics and power of functions (v5).
+- They support both simple and rich domain pipelines with zero duplication (thanks to generics in v7).
+- Future‑proof: adding observability, resilience, or async composition is a matter of composing functions, not creating and wiring more classes.
+- Approachable: simple APIs (Order, Orders, withEmail, factory methods) + optional registries and generic helpers keep usage consistent and readable.
 
 ### When you might still choose earlier versions
 - v3 (“better”) for teams more comfortable with OO and DI while keeping code size small, when cross‑cutting needs are limited.
@@ -92,14 +111,15 @@ Here’s a clear, side‑by‑side comparison of all six iterations, highlightin
 - v5 when you want the functional style but don’t need richer domain objects or async/registries yet.
 
 ### Recommended direction
-- Keep v6 as your primary approach. It offers the best trade‑offs:
+- Keep v6/v7 as your primary approach. They offer the best trade‑offs:
     - Strategy selection via factory or lambdas.
     - Declarative composition of behaviors at runtime.
     - Domain‑aware pipelines via RichOrder when needed.
     - Modern async via virtual threads.
-- Maintain small helper registries (like DecoratorStrategies) for consistency and discoverability, especially in larger teams.
+    - DRY, type‑safe pipeline wiring via DecoratorRegistries and Pipelines (v7).
+- Maintain small helper registries (like DecoratorStrategies/RichDecoratorStrategies) for consistency and discoverability, and use DecoratorRegistries + Pipelines where composition repeats.
 
-In short: v6 is the strongest and most maintainable version so far. It adheres to SOLID, enables open/closed extensibility, favors composition over inheritance, and leverages modern Java to reduce incidental complexity.
+In short: v7 is the strongest and most maintainable version so far. It adheres to SOLID, enables open/closed extensibility, favors composition over inheritance, leverages modern Java, and removes boilerplate with generics.
 
 ## Project structure
 
@@ -110,8 +130,9 @@ In short: v6 is the strongest and most maintainable version so far. It adheres t
     - refactor_better_with_decorator
     - refactor_better_with_decorator_functional
     - refactor_better_with_decorator_functional_with_java_latest_features
+    - refactor_better_with_decorator_functional_with_java_latest_features_and_generics
 
-Some versions include a Main class to run examples directly (notably in `refactor_better`, `refactor_better_with_decorator`, `refactor_better_with_decorator_functional` and `refactor_better_with_decorator_functional_with_java_latest_features`).
+Some versions include a Main class to run examples directly (notably in `refactor_better`, `refactor_better_with_decorator`, `refactor_better_with_decorator_functional`, `refactor_better_with_decorator_functional_with_java_latest_features` and `refactor_better_with_decorator_functional_with_java_latest_features_and_generics`).
 
 ## Requirements
 
@@ -144,6 +165,10 @@ java -cp target/classes com.cleancode.exercise.refactor_better_with_decorator_fu
 - Refactor (functional with java latest features):
 ```bash
 java -cp target/classes com.cleancode.exercise.refactor_better_with_decorator_functional_with_java_latest_features.Main
+```
+- Refactor (functional with java latest features and generics):
+```bash
+java -cp target/classes com.cleancode.exercise.refactor_better_with_decorator_functional_with_java_latest_features_and_generics.Main
 ```
 If you prefer Maven Exec Plugin, you can add it to the build and run with `-Dexec.mainClass=...`. As-is, the plugin is not configured in this project.
 
