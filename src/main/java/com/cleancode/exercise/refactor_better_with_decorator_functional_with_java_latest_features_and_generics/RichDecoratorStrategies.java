@@ -1,6 +1,7 @@
 package com.cleancode.exercise.refactor_better_with_decorator_functional_with_java_latest_features_and_generics;
 
 import java.io.PrintStream;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
@@ -18,19 +19,32 @@ public final class RichDecoratorStrategies {
 
     public static Map<RichDecoratorType, UnaryOperator<RichOrder>> basic(PrintStream out) {
         var map = DecoratorRegistries.<RichDecoratorType, RichOrder>createEnumMap(RichDecoratorType.class);
-        map.put(RichDecoratorType.NONE, UnaryOperator.identity());
-
-        map.put(RichDecoratorType.LOGGING, wrapSimpleDecorator(order -> Orders.logged(order, out, "RICH")));
-        map.put(RichDecoratorType.TIMING,  wrapSimpleDecorator(order -> Orders.timed(order, out)));
-        map.put(RichDecoratorType.RETRY_3, wrapSimpleDecorator(order -> Orders.retried(order, 3)));
+        addIdentityFunction(map);
+        addSingleRegistries(out, map);
         return Map.copyOf(map);
     }
 
     public static Map<RichDecoratorType, UnaryOperator<RichOrder>> withEmail(PrintStream out, EmailSender emailSender) {
         var map = DecoratorRegistries.<RichDecoratorType, RichOrder>createEnumMap(RichDecoratorType.class);
-        map.put(RichDecoratorType.NONE, UnaryOperator.identity());
-
+        addIdentityFunction(map);
         // Email-aware rich decorators: operate on Customer, only send if email is present
+        addEmailRegistries(emailSender, map);
+        // Include basics so callers can use a single registry if they want
+        addSingleRegistries(out, map);
+        return Map.copyOf(map);
+    }
+
+    private static void addIdentityFunction(EnumMap<RichDecoratorType, UnaryOperator<RichOrder>> map) {
+        map.put(RichDecoratorType.NONE, UnaryOperator.identity());
+    }
+
+    private static void addSingleRegistries(PrintStream out, EnumMap<RichDecoratorType, UnaryOperator<RichOrder>> map) {
+        map.put(RichDecoratorType.LOGGING, wrapSimpleDecorator(order -> Orders.logged(order, out, "RICH")));
+        map.put(RichDecoratorType.TIMING,  wrapSimpleDecorator(order -> Orders.timed(order, out)));
+        map.put(RichDecoratorType.RETRY_3, wrapSimpleDecorator(order -> Orders.retried(order, 3)));
+    }
+
+    private static void addEmailRegistries(EmailSender emailSender, EnumMap<RichDecoratorType, UnaryOperator<RichOrder>> map) {
         map.put(RichDecoratorType.EMAIL_SYNC, rich -> RichDecorators.withEmail(rich, emailSender));
         map.put(RichDecoratorType.EMAIL_ASYNC, rich -> customer -> {
             rich.process(customer);
@@ -39,12 +53,5 @@ public final class RichDecoratorStrategies {
                 else emailSender.send(customer.name());
             }
         });
-
-        // Include basics so callers can use a single registry if they want
-        map.put(RichDecoratorType.LOGGING, wrapSimpleDecorator(order -> Orders.logged(order, out, "RICH")));
-        map.put(RichDecoratorType.TIMING,  wrapSimpleDecorator(order -> Orders.timed(order, out)));
-        map.put(RichDecoratorType.RETRY_3, wrapSimpleDecorator(order -> Orders.retried(order, 3)));
-
-        return Map.copyOf(map);
     }
 }
