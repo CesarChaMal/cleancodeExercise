@@ -9,7 +9,7 @@ public final class DecoratorStrategies {
     private DecoratorStrategies() {}
 
     public static Map<DecoratorType, UnaryOperator<Order>> basic(PrintStream out) {
-        var map = new EnumMap<DecoratorType, UnaryOperator<Order>>(DecoratorType.class);
+        var map = getOperatorEnumMap();
         map.put(DecoratorType.NONE, UnaryOperator.identity());
 
         map.put(DecoratorType.LOGGING, order -> Orders.logged(order, out, "LOG"));
@@ -20,7 +20,7 @@ public final class DecoratorStrategies {
 
     // Email-capable map using a sender function
     public static Map<DecoratorType, UnaryOperator<Order>> withEmail(PrintStream out, EmailSender emailSender) {
-        var map = new EnumMap<DecoratorType, UnaryOperator<Order>>(DecoratorType.class);
+        var map = getOperatorEnumMap();
         map.put(DecoratorType.NONE, UnaryOperator.identity());
 
         map.put(DecoratorType.EMAIL_SYNC,  order -> order.andThen(name -> emailSender.send(name)));
@@ -33,5 +33,9 @@ public final class DecoratorStrategies {
         map.put(DecoratorType.TIMING,  order -> Orders.timed(order, out));
         map.put(DecoratorType.RETRY_3, order -> Orders.retried(order, 3));
         return Map.copyOf(map);
+    }
+
+    private static EnumMap<DecoratorType, UnaryOperator<Order>> getOperatorEnumMap() {
+        return new EnumMap<DecoratorType, UnaryOperator<Order>>(DecoratorType.class);
     }
 }

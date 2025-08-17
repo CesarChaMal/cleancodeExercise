@@ -18,7 +18,7 @@ public final class RichDecoratorStrategies {
     }
 
     public static Map<RichDecoratorType, UnaryOperator<RichOrder>> basic(PrintStream out) {
-        var map = new EnumMap<RichDecoratorType, UnaryOperator<RichOrder>>(RichDecoratorType.class);
+        var map = getOperatorEnumMap();
         map.put(RichDecoratorType.NONE, UnaryOperator.identity());
         map.put(RichDecoratorType.LOGGING, wrapSimpleDecorator(order -> Orders.logged(order, out, "RICH")));
         map.put(RichDecoratorType.TIMING,  wrapSimpleDecorator(order -> Orders.timed(order, out)));
@@ -27,7 +27,7 @@ public final class RichDecoratorStrategies {
     }
 
     public static Map<RichDecoratorType, UnaryOperator<RichOrder>> withEmail(PrintStream out, EmailSender emailSender) {
-        var map = new EnumMap<RichDecoratorType, UnaryOperator<RichOrder>>(RichDecoratorType.class);
+        var map = getOperatorEnumMap();
         map.put(RichDecoratorType.NONE, UnaryOperator.identity());
 
         // Email-aware rich decorators: operate on Customer, only send if email is present
@@ -46,5 +46,9 @@ public final class RichDecoratorStrategies {
         map.put(RichDecoratorType.RETRY_3, wrapSimpleDecorator(order -> Orders.retried(order, 3)));
 
         return Map.copyOf(map);
+    }
+
+    private static EnumMap<RichDecoratorType, UnaryOperator<RichOrder>> getOperatorEnumMap() {
+        return new EnumMap<RichDecoratorType, UnaryOperator<RichOrder>>(RichDecoratorType.class);
     }
 }

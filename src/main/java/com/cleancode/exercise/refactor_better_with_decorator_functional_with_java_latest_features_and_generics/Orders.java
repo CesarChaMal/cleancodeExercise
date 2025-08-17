@@ -1,9 +1,11 @@
 package com.cleancode.exercise.refactor_better_with_decorator_functional_with_java_latest_features_and_generics;
 
+import java.io.PrintStream;
+
 public final class Orders {
     private Orders() {}
 
-    public static Order timed(Order order, java.io.PrintStream out) {
+    public static Order timed(Order order, PrintStream out) {
         return customer -> {
             long start = System.nanoTime();
             order.process(customer);
@@ -12,7 +14,7 @@ public final class Orders {
         };
     }
 
-    public static Order logged(Order order, java.io.PrintStream out, String label) {
+    public static Order logged(Order order, PrintStream out, String label) {
         return customer -> {
             out.printf("[%s] -> %s%n", label, customer);
             order.process(customer);

@@ -1,5 +1,6 @@
 package com.cleancode.exercise.refactor_better_with_decorator_functional_with_java_latest_features_and_generics;
 import java.io.PrintStream;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
@@ -19,5 +20,9 @@ public record DecoratorRegistries<K extends Enum<K>, T>(
                 RichDecoratorStrategies.basic(out),
                 RichDecoratorStrategies.withEmail(out, sender)
         );
+    }
+
+    public static <K extends Enum<K>, T> EnumMap<K, UnaryOperator<T>> createEnumMap(Class<K> enumClass) {
+        return new EnumMap<>(enumClass);
     }
 }

@@ -1,7 +1,6 @@
 package com.cleancode.exercise.refactor_better_with_decorator_functional_with_java_latest_features_and_generics;
 
 import java.io.PrintStream;
-import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
@@ -18,7 +17,7 @@ public final class RichDecoratorStrategies {
     }
 
     public static Map<RichDecoratorType, UnaryOperator<RichOrder>> basic(PrintStream out) {
-        var map = new EnumMap<RichDecoratorType, UnaryOperator<RichOrder>>(RichDecoratorType.class);
+        var map = DecoratorRegistries.<RichDecoratorType, RichOrder>createEnumMap(RichDecoratorType.class);
         map.put(RichDecoratorType.NONE, UnaryOperator.identity());
 
         map.put(RichDecoratorType.LOGGING, wrapSimpleDecorator(order -> Orders.logged(order, out, "RICH")));
@@ -28,7 +27,7 @@ public final class RichDecoratorStrategies {
     }
 
     public static Map<RichDecoratorType, UnaryOperator<RichOrder>> withEmail(PrintStream out, EmailSender emailSender) {
-        var map = new EnumMap<RichDecoratorType, UnaryOperator<RichOrder>>(RichDecoratorType.class);
+        var map = DecoratorRegistries.<RichDecoratorType, RichOrder>createEnumMap(RichDecoratorType.class);
         map.put(RichDecoratorType.NONE, UnaryOperator.identity());
 
         // Email-aware rich decorators: operate on Customer, only send if email is present
